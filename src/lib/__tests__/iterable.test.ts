@@ -11,6 +11,17 @@ test("mapBy", () => {
   ]);
 });
 
+test("filterBy", () => {
+  const it = new It([1, 2, 3]);
+  const fn = jest.fn((n) => n % 2 === 1);
+  expect(it.filterBy(fn).toJs()).toEqual([1, 3]);
+  expect(fn.mock.calls).toEqual([
+    [1, 0, it],
+    [2, 1, it],
+    [3, 2, it],
+  ]);
+});
+
 test("fold", () => {
   const it = new It([1, 2, 3]);
   const fn = jest.fn((v, n) => v * n);
@@ -55,6 +66,16 @@ test("nth", () => {
   expect(new It([1, 2, 3, 4, 5]).nth(4)).toBe(5);
   expect(new It([1, 2, 3, 4, 5]).nth(5)).toBe(undefined);
   expect(new It([1, 2, 3, 4, 5]).nth(-1)).toBe(undefined);
+});
+
+test("first", () => {
+  expect(new It(["x", "y", "z"]).first()).toBe("x");
+  expect(new It([]).first()).toBe(undefined);
+});
+
+test("last", () => {
+  expect(new It(["x", "y", "z"]).last()).toBe("z");
+  expect(new It([]).last()).toBe(undefined);
 });
 
 test("drop", () => {
@@ -136,6 +157,12 @@ test("max", () => {
   expect(new It([]).max()).toBe(undefined);
 });
 
+test("fromDigits", () => {
+  expect(new It([3, 2, 1]).fromDigits()).toBe(123);
+  expect(new It([0, 0, 1]).fromDigits(2)).toBe(4);
+  expect(new It([]).fromDigits()).toBe(0);
+});
+
 test("transpose", () => {
   expect(
     new It([
@@ -185,4 +212,65 @@ test("joinStr", () => {
   expect(new It(["x", "y", "z"]).joinStr(".")).toBe("x.y.z");
   expect(new It([1, 2, 3]).joinStr()).toBe("123");
   expect(new It([]).joinStr()).toBe("");
+});
+
+test("permutations", () => {
+  expect(new It([1, 2, 3]).permutations().toJs()).toEqual([
+    [1, 2, 3],
+    [2, 1, 3],
+    [3, 1, 2],
+    [1, 3, 2],
+    [2, 3, 1],
+    [3, 2, 1],
+  ]);
+});
+
+test("sorted", () => {
+  expect(new It([3, 1, 2, 5, 4]).sorted().toJs()).toEqual([1, 2, 3, 4, 5]);
+  expect(new It([3, 22, 111]).sorted().toJs()).toEqual([3, 22, 111]);
+  expect(new It(["y", "z", "x"]).sorted().toJs()).toEqual(["x", "y", "z"]);
+  expect(new It([3, "2", 1]).sorted().toJs()).toEqual([1, 3, "2"]);
+  expect(new It([4, "2", 3n, 1]).sorted().toArray().join(",")).toEqual(
+    [1, 3n, 4, "2"].join(",")
+  );
+  expect(
+    new It([
+      "2",
+      {},
+      [],
+      Symbol.for("x"),
+      {},
+      "0",
+      true,
+      false,
+      null,
+      undefined,
+      44,
+      5,
+      2,
+    ])
+      .sorted()
+      .toJs()
+  ).toEqual([
+    false,
+    true,
+    2,
+    5,
+    44,
+    "0",
+    "2",
+    {},
+    [],
+    Symbol.for("x"),
+    {},
+    null,
+    undefined,
+  ]);
+
+  expect(
+    new It([3, 1, 2, 5, 4]).sorted((n) => [3, 1, 5, 2, 4].indexOf(n)).toJs()
+  ).toEqual([3, 1, 5, 2, 4]);
+  expect(
+    new It([3, 1, 2, 5, 4]).sorted(undefined, (a, b) => b - a).toJs()
+  ).toEqual([5, 4, 3, 2, 1]);
 });

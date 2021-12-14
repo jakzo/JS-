@@ -9,7 +9,9 @@ export const log = <T>(value: T, message?: string): T => {
 
 export type ToJs<T> = T extends It<infer V> ? ToJs<V>[] : T;
 export const toJs = <T>(value: T): ToJs<T> =>
-  (value instanceof It ? mapBy(value, toJs).toArray() : value) as ToJs<T>;
+  (value instanceof It || value instanceof Array
+    ? mapBy(value, toJs).toArray()
+    : value) as ToJs<T>;
 
 export const also = <T>(value: T, func: (value: T) => void): T => {
   func(value);
@@ -18,6 +20,3 @@ export const also = <T>(value: T, func: (value: T) => void): T => {
 
 export const transform = <T, U>(value: T, func: (value: T) => U): U =>
   func(value);
-
-export const or = <T, U>(value: T, other: U): NonNullable<T> | U =>
-  value ?? other;

@@ -54,14 +54,6 @@ export interface JsppCommon<T> {
    *
    * @example "hello".transform(str => str.toUpperCase()) => "HELLO" */
   transform<U>(func: (value: T) => U): U;
-
-  /** `O(1)` Returns the `defaultValue` if the value is `undefined` or `null`.
-   *
-   * @example "test".or("other") => "test"
-   * undefined.or("other") => "other"
-   */
-  // Uhhhhh...
-  or<U>(defaultValue: U): NonNullable<T> | U;
 }
 
 export interface JsppIterable<T, S = Iterable<T>> extends JsppCommon<T> {
@@ -74,6 +66,11 @@ export interface JsppIterable<T, S = Iterable<T>> extends JsppCommon<T> {
    *
    * @example [1, 2, 3].mapBy(n => n * 2) => [2, 4, 6] */
   mapBy<U>(fn: (value: T, index: number, subject: S) => U): It<U>;
+
+  /** `O(n)` Returns only the items for which `fn` returns true.
+   *
+   * @example [1, 2, 3].filterBy(n => n % 2 === 1) => [1, 3] */
+  filterBy(fn: (value: T, index: number, subject: S) => boolean): It<T>;
 
   /** `O(n)` Similar to JS `reduce`. Accumulates all values into a single value.
    *
@@ -104,6 +101,16 @@ export interface JsppIterable<T, S = Iterable<T>> extends JsppCommon<T> {
    *
    * @example ["x", "y", "z"].nth(2) => "z" */
   nth(index: number): T;
+
+  /** `O(1)` Returns the first element of the iterable.
+   *
+   * @example ["x", "y", "z"].first() => "x" */
+  first(): T;
+
+  /** `O(n)` Returns the last element of the iterable.
+   *
+   * @example ["x", "y", "z"].last() => "z" */
+  last(): T;
 
   /** `O(n)` Returns an iterable missing the first `num` elements.
    *
@@ -150,6 +157,13 @@ export interface JsppIterable<T, S = Iterable<T>> extends JsppCommon<T> {
    */
   max(): T;
 
+  /** `O(n)` Converts a list of digits into a number. Digits should be ordered
+   * from least significant to most.
+   *
+   * @example [3, 2, 1].fromDigits() => 123
+   * [0, 0, 1].fromDigits(2) => 4 */
+  fromDigits(base?: number): number;
+
   /** `O(m*n)` Swaps the rows and columns of the source iterable.
    *
    * ```js
@@ -179,4 +193,20 @@ export interface JsppIterable<T, S = Iterable<T>> extends JsppCommon<T> {
    * ["x", "y", "z"].joinStr(".") => "x.y.z"
    */
   joinStr(separator?: string): string;
+
+  /** `O(n^2)` Returns every permutation of the iterable's elements.
+   *
+   * @example [1, 2, 3].permutations() => [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]] */
+  permutations(): It<It<T>>;
+
+  /** `O(n log n)` Returns the list sorted. Can optionally be sorted by a
+   * custom key or comparator.
+   *
+   * @example [3, 1, 2].sorted() => [1, 2, 3]
+   * [3, 1, 2].sorted(n => -n) => [3, 2, 1]
+   * [3, 1, 2].sorted(undefined, (a, b) => b - a) => [3, 2, 1] */
+  sorted<U = T>(
+    by?: (value: T) => U,
+    comparator?: (a: U, b: U) => number
+  ): It<T>;
 }

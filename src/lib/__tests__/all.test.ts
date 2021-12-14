@@ -1,4 +1,4 @@
-import { It, also, log, or, toJs, transform } from "../..";
+import { It, also, log, toJs, transform } from "../..";
 
 describe("log", () => {
   const consoleLog = jest.spyOn(console, "log").mockImplementation();
@@ -35,11 +35,4 @@ test("transform", () => {
   const mock = jest.fn((n) => n * 2);
   expect(transform(123, mock)).toBe(246);
   expect(mock).toBeCalledWith(123);
-});
-
-test("or", () => {
-  expect(or(undefined, 3)).toBe(3);
-  expect(or(1, 3)).toBe(1);
-  expect(or(null, 3)).toBe(3);
-  expect(or(false, 3)).toBe(false);
 });
